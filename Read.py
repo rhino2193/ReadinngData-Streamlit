@@ -76,11 +76,10 @@ with tab1:
     st.dataframe(reading_now[["Title", "Author", "Year", "Start_Date"]])
 
 with tab2:
-    st.header("Backlog: what's next?")
+    st.header("Backlog:")
 
     backlog_books = backlog[backlog["Format"].isin(formats)]
     st.write(f"Showing {len(backlog_books)} backlog books, "
-             f"{int(backlog_books['Pages'].sum()):,} pages in total.")
 
     st.subheader("Backlog by format")
     format_chart = backlog_books["Format"].value_counts().reset_index()

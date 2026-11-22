@@ -43,11 +43,24 @@ with tab1:
     st.header("Finished books")
     st.write(f"Showing {len(books)} of {len(finished_only)} finished books.")
 
-    st.subheader("Books finished per month")
-    st.bar_chart(books["End_Date"].dt.strftime("%Y-%m").value_counts().sort_index())
+    st.subheader("Books finished per month in 2026")
+    books_2026 = books[books["Year"] == 2026]
+    # Use 3-letter months (Jan, Feb, Mar...) instead of 2026-01, 2026-02.
+    # List them in calendar order, so Jan comes first, not Apr.
+    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    monthly = books_2026["End_Date"].dt.strftime("%b").value_counts()
+    monthly = monthly.reindex(months).dropna()
+    st.bar_chart(monthly)
 
     st.subheader("Books by rating")
-    st.bar_chart(books["Rating"].value_counts().sort_index())
+    # Rating is a number, so Streamlit turns the 1-5 labels sideways.
+    # Turn it into text first, so Streamlit treats it as categories
+    # and keeps the labels upright.
+    rating_chart = books["Rating"].value_counts().sort_index().reset_index()
+    rating_chart.columns = ["Rating", "Books"]
+    rating_chart["Rating"] = rating_chart["Rating"].astype(int).astype(str)
+    st.bar_chart(rating_chart, x="Rating", y="Books")
 
     st.subheader("Book list")
     st.dataframe(books[["Title", "Author", "Year", "End_Date", "Rating"]])

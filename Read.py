@@ -3,6 +3,9 @@ import pandas as pd
 import streamlit as st
 
 st.title("Armando's Reading Tracker")
+st.write("Books I finished in 2025-2026, and the books left in my backlog. "
+         "Filter by year and rating, see my reading patterns, and get a "
+         "random pick from my 67-book backlog.")
 
 # Load the data
 finished = pd.read_csv("books_finished.csv")
@@ -35,18 +38,19 @@ if search:
                   books["Author"].str.contains(search, case=False, na=False)]
 
 # Two tabs: finished books, and what is next
-tab1, tab2 = st.tabs(["Finished books", "Backlog: what's next?"])
+tab1, tab2 = st.tabs(["Finished books", "Backlog"])
 
 with tab1:
     st.header("Finished books")
     st.write(f"Showing {len(books)} of {len(finished_only)} finished books.")
 
     # The monthly bar chart and the line graph follow the year picked
-# in the sidebar. If "All years" is picked, show 2026.
+    # in the sidebar. If "All years" is picked, show 2026.
     chart_year = 2026 if year == "All years" else int(year)
     chart_books = books[books["Year"] == chart_year]
 
     st.subheader(f"Books finished per month in {chart_year}")
+
     months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     monthly = chart_books["End_Date"].dt.strftime("%b").value_counts()
@@ -59,6 +63,7 @@ with tab1:
     st.altair_chart(monthly_chart, use_container_width=True)
 
     st.subheader(f"Total books finished over time in {chart_year}")
+
     chart_monthly = chart_books["End_Date"].dt.strftime("%b").value_counts()
     chart_monthly = chart_monthly.reindex(months).dropna()
     over_time = chart_monthly.cumsum().reset_index()
@@ -68,7 +73,7 @@ with tab1:
         x=alt.X("Month", sort=months, axis=alt.Axis(labelAngle=0)),
         y="Books so far",
     )
-st.altair_chart(over_time_chart, use_container_width=True)
+    st.altair_chart(over_time_chart, use_container_width=True)
 
     st.subheader("Books by rating")
     rating_chart = books["Rating"].value_counts().sort_index().reset_index()
@@ -88,10 +93,11 @@ st.altair_chart(over_time_chart, use_container_width=True)
     st.dataframe(reading_now[["Title", "Author", "Year", "Start_Date"]])
 
 with tab2:
-    st.header("Backlog:")
+    st.header("Backlog: what's next?")
 
     backlog_books = backlog[backlog["Format"].isin(formats)]
-    st.write(f"Showing {len(backlog_books)} backlog books")
+    st.write(f"Showing {len(backlog_books)} backlog books, "
+      
 
     st.subheader("Backlog by format")
     format_chart = backlog_books["Format"].value_counts().reset_index()
@@ -110,4 +116,3 @@ with tab2:
 
     st.subheader("Backlog list")
     st.dataframe(backlog_books[["Title", "Author", "Pages", "Format", "Ownership"]])
-

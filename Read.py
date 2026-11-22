@@ -3,9 +3,6 @@ import pandas as pd
 import streamlit as st
 
 st.title("Armando's Reading Tracker")
-st.write("Books I finished in 2025-2026, and the books left in my backlog. "
-         "Filter by year and rating, see my reading patterns, and get a "
-         "random pick from my 67-book backlog.")
 
 # Load the data
 finished = pd.read_csv("books_finished.csv")
@@ -80,7 +77,6 @@ with tab1:
 
 with tab2:
     st.header("Backlog: what's next?")
-    st.write("All 67 backlog books are already owned, so there is nothing to buy.")
 
     backlog_books = backlog[backlog["Format"].isin(formats)]
     st.write(f"Showing {len(backlog_books)} backlog books, "

@@ -1,3 +1,4 @@
+import altair as alt
 import pandas as pd
 import streamlit as st
 
@@ -45,22 +46,31 @@ with tab1:
 
     st.subheader("Books finished per month in 2026")
     books_2026 = books[books["Year"] == 2026]
-    # Use 3-letter months (Jan, Feb, Mar...) instead of 2026-01, 2026-02.
-    # List them in calendar order, so Jan comes first, not Apr.
+    # st.bar_chart sorts month names A-Z and turns the labels sideways,
+    # and it has no setting to change that. So use Altair directly
+    # (the chart tool Streamlit uses underneath) for these charts.
+    # sort= keeps Jan first, labelAngle=0 keeps the labels upright.
     months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     monthly = books_2026["End_Date"].dt.strftime("%b").value_counts()
-    monthly = monthly.reindex(months).dropna()
-    st.bar_chart(monthly)
+    monthly = monthly.reindex(months).dropna().reset_index()
+    monthly.columns = ["Month", "Books"]
+    monthly_chart = alt.Chart(monthly).mark_bar().encode(
+        x=alt.X("Month", sort=months, axis=alt.Axis(labelAngle=0)),
+        y="Books",
+    )
+    st.altair_chart(monthly_chart, use_container_width=True)
 
     st.subheader("Books by rating")
-    # Rating is a number, so Streamlit turns the 1-5 labels sideways.
-    # Turn it into text first, so Streamlit treats it as categories
-    # and keeps the labels upright.
     rating_chart = books["Rating"].value_counts().sort_index().reset_index()
     rating_chart.columns = ["Rating", "Books"]
     rating_chart["Rating"] = rating_chart["Rating"].astype(int).astype(str)
-    st.bar_chart(rating_chart, x="Rating", y="Books")
+    rating_chart = alt.Chart(rating_chart).mark_bar().encode(
+        x=alt.X("Rating", sort=["1", "2", "3", "4", "5"],
+                axis=alt.Axis(labelAngle=0)),
+        y="Books",
+    )
+    st.altair_chart(rating_chart, use_container_width=True)
 
     st.subheader("Book list")
     st.dataframe(books[["Title", "Author", "Year", "End_Date", "Rating"]])
@@ -77,7 +87,14 @@ with tab2:
              f"{int(backlog_books['Pages'].sum()):,} pages in total.")
 
     st.subheader("Backlog by format")
-    st.bar_chart(backlog_books["Format"].value_counts())
+    format_chart = backlog_books["Format"].value_counts().reset_index()
+    format_chart.columns = ["Format", "Books"]
+    format_chart = alt.Chart(format_chart).mark_bar().encode(
+        x=alt.X("Format", sort=["Ebook", "Hardcover", "Paperback"],
+                axis=alt.Axis(labelAngle=0)),
+        y="Books",
+    )
+    st.altair_chart(format_chart, use_container_width=True)
 
     if st.button("Pick a random book from the backlog"):
         pick = backlog_books.sample(1).iloc[0]
@@ -86,3 +103,4 @@ with tab2:
 
     st.subheader("Backlog list")
     st.dataframe(backlog_books[["Title", "Author", "Pages", "Format", "Ownership"]])
+

@@ -58,6 +58,12 @@ with tab1:
     )
     st.altair_chart(monthly_chart, use_container_width=True)
 
+  st.subheader("Total books finished over time")
+  over_time = books.sort_values("End_Date").copy()
+  over_time["Books so far"] = range(1, len(over_time) + 1)
+  st.line_chart(over_time, x="End_Date", y="Books so far")
+
+
     st.subheader("Books by rating")
     rating_chart = books["Rating"].value_counts().sort_index().reset_index()
     rating_chart.columns = ["Rating", "Books"]

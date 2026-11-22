@@ -72,7 +72,7 @@ st.altair_chart(over_time_chart, use_container_width=True)
 
 
 
-    st.subheader("Books by rating")
+  st.subheader("Books by rating")
     rating_chart = books["Rating"].value_counts().sort_index().reset_index()
     rating_chart.columns = ["Rating", "Books"]
     rating_chart["Rating"] = rating_chart["Rating"].astype(int).astype(str)

@@ -41,15 +41,15 @@ with tab1:
     st.header("Finished books")
     st.write(f"Showing {len(books)} of {len(finished_only)} finished books.")
 
-    st.subheader("Books finished per month in 2026")
-    books_2026 = books[books["Year"] == 2026]
-    # st.bar_chart sorts month names A-Z and turns the labels sideways,
-    # and it has no setting to change that. So use Altair directly
-    # (the chart tool Streamlit uses underneath) for these charts.
-    # sort= keeps Jan first, labelAngle=0 keeps the labels upright.
+    # The monthly bar chart and the line graph follow the year picked
+# in the sidebar. If "All years" is picked, show 2026.
+    chart_year = 2026 if year == "All years" else int(year)
+    chart_books = books[books["Year"] == chart_year]
+
+    st.subheader(f"Books finished per month in {chart_year}")
     months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    monthly = books_2026["End_Date"].dt.strftime("%b").value_counts()
+    monthly = chart_books["End_Date"].dt.strftime("%b").value_counts()
     monthly = monthly.reindex(months).dropna().reset_index()
     monthly.columns = ["Month", "Books"]
     monthly_chart = alt.Chart(monthly).mark_bar().encode(
@@ -58,10 +58,18 @@ with tab1:
     )
     st.altair_chart(monthly_chart, use_container_width=True)
 
-    st.subheader("Total books finished over time")
-    over_time = books.sort_values("End_Date").copy()
-    over_time["Books so far"] = range(1, len(over_time) + 1)
-    st.line_chart(over_time, x="End_Date", y="Books so far")
+    st.subheader(f"Total books finished over time in {chart_year}")
+    chart_monthly = chart_books["End_Date"].dt.strftime("%b").value_counts()
+    chart_monthly = chart_monthly.reindex(months).dropna()
+    over_time = chart_monthly.cumsum().reset_index()
+    over_time.columns = ["Month", "Books so far"]
+    over_time["Books so far"] = over_time["Books so far"].astype(int)
+    over_time_chart = alt.Chart(over_time).mark_line().encode(
+        x=alt.X("Month", sort=months, axis=alt.Axis(labelAngle=0)),
+        y="Books so far",
+    )
+st.altair_chart(over_time_chart, use_container_width=True)
+
 
 
     st.subheader("Books by rating")

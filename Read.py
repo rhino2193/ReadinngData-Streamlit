@@ -96,7 +96,7 @@ with tab2:
     st.header("Backlog: what's next?")
 
     backlog_books = backlog[backlog["Format"].isin(formats)]
-    st.write(f"Showing {len(backlog_books)} backlog books, "
+    st.write(f"Showing {len(backlog_books)} backlog books")
       
 
     st.subheader("Backlog by format")

@@ -79,7 +79,7 @@ with tab2:
     st.header("Backlog:")
 
     backlog_books = backlog[backlog["Format"].isin(formats)]
-    st.write(f"Showing {len(backlog_books)} backlog books, "
+    st.write(f"Showing {len(backlog_books)} backlog books, ")
 
     st.subheader("Backlog by format")
     format_chart = backlog_books["Format"].value_counts().reset_index()
